@@ -16,25 +16,24 @@ const App = () => {
   const [largeImage, setLargeImage] = useState('second');
 
   useEffect(() => {
-    getImages(searchQuery, page);
+    async function getImages() {
+      if (!searchQuery) {
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const { hits, totalHits } = await fetchImages(searchQuery, page);
+        if (hits.length === 0) alert('Nothing found!!!');
+        setImages(prevImages => [...prevImages, ...hits]);
+        setLoadMore(page < Math.ceil(totalHits / 12));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    getImages();
   }, [searchQuery, page]);
-
-  const getImages = async (searchQuery, page) => {
-    if (!searchQuery) {
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const { hits, totalHits } = await fetchImages(searchQuery, page);
-      if (hits.length === 0) alert('Nothing found!!!');
-      setImages([...images, ...hits]);
-      setLoadMore(page < Math.ceil(totalHits / 12));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const formSubmit = searchQuery => {
     setSearchQuery(searchQuery);
